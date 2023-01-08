@@ -34,6 +34,14 @@ func getCBBuildsWithFilter(projectID string, filter string, cFilters []clientBui
 	appendClientFilteredBuilds := func(builds []*cloudbuild.Build) {
 		for _, b := range builds {
 			appendBuild := true
+			for _, cFilter := range cFilters{
+				if cFilter(b) {
+					appendBuild = true
+					break
+				}
+				
+			}
+			
 			for _, cFilter := range cFilters {
 				// skip if any client side filter evaluates to false
 				if !cFilter(b) {
@@ -54,6 +62,7 @@ func getCBBuildsWithFilter(projectID string, filter string, cFilters []clientBui
 
 	// pagination
 	for {
+		c, err = cloudbuildService.Projects.Builds.List(projectID).Filter(filter).PageToken(c.NextPageToken).Do()
 		c, err = cloudbuildService.Projects.Builds.List(projectID).Filter(filter).PageToken(c.NextPageToken).Do()
 		if err != nil {
 			return nil, fmt.Errorf("error retriving next page with token %s: %v", c.NextPageToken, err)
